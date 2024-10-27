@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "mugc-agc-backend": {
+      "candid": "src/mugc-agc-backend/mugc-agc-backend.did",
+      "package": "mugc-agc-backend",
+      "type": "rust"
+    },
+    "mugc-agc-frontend": {
+      "dependencies": [
+        "mugc-agc-backend"
+      ],
+      "source": [
+        "src/mugc-agc-frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "mugc-agc-frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
