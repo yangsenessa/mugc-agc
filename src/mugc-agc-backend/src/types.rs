@@ -36,7 +36,7 @@ impl Mul<u64> for Tokens {
     }
 }
 // Struct for candid
-#[derive(Clone, Debug, Default, CandidType,Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct ComfyUIPayload {
     pub gen_ai_node:ComfyUINode,
     pub wk_info_id:String,
@@ -45,14 +45,14 @@ pub struct ComfyUIPayload {
     pub voice_base64:String,
     pub category:String
 }
-#[derive(Clone, Debug, Default, CandidType,Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct PromtsVecParams {
     pub param_name:String,
     pub param_val:String,
     pub related_wk_node:String //Related to workflow node's params for inputing
 }
 
-#[derive(Clone, Debug, Default, CandidType,Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct ComfyUINode {
     pub host:String,
     pub url_suffix:String,
@@ -60,7 +60,7 @@ pub struct ComfyUINode {
 }
 
 //Smart contract related
-#[derive(Clone, Debug, Default, CandidType,Serialize, Deserialize)]
+#[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct GenaiProposal {
     pub id:u64,
     pub timestamp:u64,
@@ -108,12 +108,21 @@ pub enum ProposalState {
 pub struct NFTDetail {
     pub tokenid:u64,
     pub miner:Principal,
-    pub contractid:String,
+    pub contract:ContractInfo
+}
+#[derive(Clone, Debug, CandidType, Deserialize, PartialEq)]
+pub struct  ContractInfo {
+    pub constractid:String,
+    pub poll_account:Principal,
+    pub token_global:u64
 }
 
+
 #[derive(Clone, Debug, CandidType, Deserialize, PartialEq)]
-pub struct ContractInfo {
+pub struct ContractCallInstance {
+    pub caller:Principal,
     pub contractid:String,
+    pub tokens:Tokens,
     pub state:ProposalState,
     pub enable_timestamp:u64,
     pub disable_timestamp:u64,
