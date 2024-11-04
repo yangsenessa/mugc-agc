@@ -69,4 +69,11 @@ If you are hosting frontend code somewhere without using DFX, you may need to ma
 
 - query_genai_proposal ```Query AIGC proposal
 
+- update_miner_contract ``` Update/init miner_contract
+
+- query_miner_contract  ``` query_miner_contract
+
+- post_nft_contract     ``` post nft miner contract
+
+
 

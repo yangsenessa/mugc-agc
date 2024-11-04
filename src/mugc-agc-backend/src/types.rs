@@ -107,14 +107,14 @@ pub enum ProposalState {
 #[derive(Clone, Debug, CandidType, Deserialize, PartialEq)]
 pub struct NFTDetail {
     pub tokenid:u64,
-    pub miner:Principal,
+    pub owner:Principal,
     pub contract:ContractInfo
 }
 #[derive(Clone, Debug, CandidType, Deserialize, PartialEq)]
 pub struct  ContractInfo {
     pub constractid:String,
     pub poll_account:Principal,
-    pub token_global:u64
+    pub token_sum:u64
 }
 
 
