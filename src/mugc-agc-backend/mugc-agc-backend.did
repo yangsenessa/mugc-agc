@@ -1,3 +1,10 @@
+type ComfyUINode =
+  record {
+    host:String,
+    url_suffix:String,
+    port:String
+  };
 service : {
     "greet": (text) -> (text) query;
-}
+    "query_comfy_nodes":() -> (vec ComfyUINode);
+};
