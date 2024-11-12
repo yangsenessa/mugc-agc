@@ -1,5 +1,7 @@
 use candid::{CandidType, Principal,Deserialize};
 use std::ops::{Add, AddAssign, Mul, SubAssign};
+use std::collections::{HashMap, HashSet};
+
 
 #[derive(Clone, Copy, Debug, Default, CandidType, Deserialize, PartialEq, PartialOrd)]
 pub struct Tokens {
@@ -62,9 +64,37 @@ pub struct NFTDetail {
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct  ContractInfo {
     pub constractid:String,
+    pub relate_nft_token_id:u64,
     pub poll_account:Principal,
     pub token_sum:u64
 }
+#[derive(CandidType, Deserialize, PartialEq)]
+enum MetadataPurpose {
+    Preview,
+    Rendered,
+}
+#[allow(clippy::enum_variant_names)]
+#[derive(CandidType, Deserialize)]
+enum MetadataVal {
+    TextContent(String),
+    BlobContent(Vec<u8>),
+    NatContent(u128),
+    Nat8Content(u8),
+    Nat16Content(u16),
+    Nat32Content(u32),
+    Nat64Content(u64),
+}
+#[derive( CandidType, Deserialize)]
+pub struct MetadataPart {
+    purpose: MetadataPurpose,
+    key_val_data: HashMap<String, MetadataVal>,
+    data: Vec<u8>,
+}
+
+
+
+
+
 
 
 

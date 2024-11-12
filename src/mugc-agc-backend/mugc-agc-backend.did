@@ -1,10 +1,25 @@
 type ComfyUINode =
   record {
-    host:String,
-    url_suffix:String,
-    port:String
+    host:text;
+    url_suffix:text;
+    port:text;
   };
+
+type AGIWkFlowNode =
+   record {
+      agi_id:text;
+      wk_flow:text;
+   }
+type AGIAssetresult = {
+  record {
+    res_code:text;
+    res_message:text;
+  }
+}
 service : {
     "greet": (text) -> (text) query;
-    "query_comfy_nodes":() -> (vec ComfyUINode);
+    "query_comfy_nodes":() -> (opt vec ComfyUINode);
+    "reg_comfy_nodes":(vec ComfyUINode) ->(opt vec ComfyUINode);
+    "update_wkflow":(AGIWkFlowNode) -> (AGIAssetresult);
+
 };

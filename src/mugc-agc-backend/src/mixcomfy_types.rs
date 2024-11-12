@@ -75,3 +75,15 @@ pub struct ContractCallInstance {
     pub disable_timestamp:u64,
     pub work_load_cnt:u64
 }
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct AGIWkFlowNode {
+    pub agi_id:String,
+    pub wk_flow:String
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct  AGIAssetresult {
+    pub res_code:String,
+    pub res_message:String
+}
