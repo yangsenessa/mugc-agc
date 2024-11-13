@@ -1,25 +1,48 @@
 type ComfyUINode =
   record {
-    host:text;
-    url_suffix:text;
-    port:text;
+    node_id:opt nat;
+    ori_url:text;
+    ws_url:text;
+    weight:int;
   };
 
 type AGIWkFlowNode =
    record {
       agi_id:text;
       wk_flow:text;
-   }
-type AGIAssetresult = {
+   };
+type AGIAssetresult = 
   record {
     res_code:text;
     res_message:text;
-  }
-}
-service : {
+  };
+
+type ComfyUIPayload =
+  record {
+    tx_id:opt nat;
+    client_id:text;
+    gen_ai_node:text;
+    app_info:text;
+    wk_id:text;
+    promt_id:text;
+    voice_key:text;
+    pdeduce_asset_key:text;
+  };
+type Result = variant { Ok : nat; Err : text };
+
+type WorkLoadInitParam = 
+  record {
+    poll_account:text;
+    token_block:nat;
+  };
+
+
+
+service :(WorkLoadInitParam) -> {
     "greet": (text) -> (text) query;
     "query_comfy_nodes":() -> (opt vec ComfyUINode);
     "reg_comfy_nodes":(vec ComfyUINode) ->(opt vec ComfyUINode);
-    "update_wkflow":(AGIWkFlowNode) -> (AGIAssetresult);
-
+    "gen_ai_node_router":() ->(opt ComfyUINode);
+    "record_ai_ledger":(ComfyUIPayload) -> (Result);
+    "export_minting_contract":() -> (opt WorkLoadInitParam)
 };

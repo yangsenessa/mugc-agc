@@ -1,20 +1,37 @@
 
 use candid::{CandidType, Principal,Deserialize};
 use serde::Serialize;
-use crate::types::{Tokens,Account};
+use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
+use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens, TransferArg, TransferError};
+
+pub type ProposalState = String;
+#[derive(Clone, Debug,CandidType, Deserialize,Default)]
+pub struct WorkLoadInitParam {
+    pub poll_account:String,
+    pub token_block:NumTokens
+}
 
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct ComfyUIPayload {
-    pub gen_ai_node:ComfyUINode,
-    pub wk_info_id:String,
+    pub tx_id:u128,
     pub client_id:String,
-    pub promts:Vec<PromtsVecParams>,
-    pub voice_base64:String,
-    pub category:String
+    pub gen_ai_node:String,
+    pub app_info:String,
+    pub wk_id:String,
+    pub promt_id:String,
+    pub voice_key:String,
+    pub deduce_asset_key:String
 }
+#[derive(Clone, Debug, Default, CandidType, Deserialize)]
+pub struct WorkLoadLedger {
+    pub work_load :Vec<ComfyUIPayload>  
+}
+
+
 #[derive(Clone, Debug, Default, CandidType, Deserialize,Serialize)]
 pub struct PromtsVecParams {
+    pub client_id:String,
     pub param_name:String,
     pub param_val:String,
     pub related_wk_node:String //Related to workflow node's params for inputing
@@ -22,9 +39,15 @@ pub struct PromtsVecParams {
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct ComfyUINode {
-    pub host:String,
-    pub url_suffix:String,
-    pub port:String
+    pub node_id:u32,
+    pub ori_url:String,
+    pub ws_url:String,
+    pub weight:i32
+}
+
+#[derive(Default,CandidType,Deserialize,Clone)]
+pub struct MixComfy{
+    pub comfy_node:Vec<ComfyUINode>   
 }
 
 //Smart contract related
@@ -37,43 +60,31 @@ pub struct GenaiProposal {
     pub state:ProposalState
 }
 
-// The state of a Proposal
-#[derive(Clone, Debug, CandidType, Deserialize, PartialEq)]
-pub enum ProposalState {
-    // The proposal is open for voting
-    Open,
 
-    // Enough "yes" votes have been cast to accept the proposal, and it will soon be executed
-    Accepted,
-
-    // Enough "no" votes have been cast to reject the proposal, and it will not be executed
-    Rejected,
-
-    // The proposal is currently being executed
-    Executing,
-
-    // The proposal has been successfully executed
-    Succeeded,
-
-    // A failure occurred while executing the proposal
-    Failed(String),
-}
 #[derive(CandidType)]
 pub enum MixComfyErr{
     NoneNodeVaild,
     RuntimeErr,
+}
+pub type OrderId = u32;
+pub type WorkloadPlacementReceipt = Result<BlockIndex, MixComfyErr>;
+#[derive(CandidType)]
+pub enum OrderPlacementErr {
+    InvalidOrder,
+    OrderBookFull,
 }
 
 //Can be considered as mining trxjnl
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct ContractCallInstance {
     pub caller:Principal,
-    pub contractid:String,
-    pub tokens:Tokens,
-    pub state:ProposalState,
-    pub enable_timestamp:u64,
-    pub disable_timestamp:u64,
-    pub work_load_cnt:u64
+    pub prompts_id:String,
+    pub client_id:String,
+    pub tokens:NumTokens,
+    pub gmt_create:u64,
+    pub agi_result:AGIAssetresult,
+    pub state:ProposalState
+
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -82,8 +93,9 @@ pub struct AGIWkFlowNode {
     pub wk_flow:String
 }
 
-#[derive(Clone, Debug, CandidType, Deserialize)]
+#[derive(Clone, Debug, Default,CandidType, Deserialize)]
 pub struct  AGIAssetresult {
     pub res_code:String,
+    pub asset_key:String,
     pub res_message:String
 }

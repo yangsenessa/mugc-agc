@@ -1,14 +1,9 @@
-mod http;
-
 use ic_cdk::caller;
 use crate::mixcomfy_types::*;
 use candid::{Nat, Principal};
 
 //
-#[derive(Default)]
-pub struct MixComfy{
-    pub comfy_node:Vec<ComfyUINode>   
-}
+
 
 impl MixComfy {
     pub fn get_comfy_nodes(&self) ->Option<Vec<ComfyUINode>>{
@@ -21,5 +16,29 @@ impl MixComfy {
         }
         Ok(())
     }
-   
+
+    pub fn decide_comfy_node(&mut self) -> Option<ComfyUINode> {
+        let mut mix_weight = -1;
+        let mut curr_node_id:u32 = 0;
+
+        for node in self.comfy_node.iter_mut() {
+            if mix_weight == -1 {
+                mix_weight = node.weight;
+                curr_node_id = node.node_id;
+            } else if mix_weight < node.weight {
+                continue;
+            } else {
+                mix_weight = node.weight;
+                curr_node_id = node.node_id;
+            }
+        }
+
+        for node in self.comfy_node.iter() {
+            if curr_node_id == node.node_id {
+                return Some(node.clone())
+            }
+        }
+        return None           
+    }
+ 
 }
