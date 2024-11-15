@@ -1,10 +1,22 @@
 
-use candid::{CandidType, Principal,Deserialize};
+use candid::{CandidType, Principal,Deserialize,Nat};
 use serde::Serialize;
 use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
-use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens, TransferArg, TransferError};
+use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 
-pub type ProposalState = String;
+#[derive(Clone, Debug,CandidType, Deserialize)]
+
+pub enum MinerTxState {
+   
+    Prepared,
+
+    Claimed
+}
+
+pub type TxIndex = Nat;
+pub type Timestamp = u64;
+
+
 #[derive(Clone, Debug,CandidType, Deserialize,Default)]
 pub struct WorkLoadInitParam {
     pub poll_account:String,
@@ -14,20 +26,27 @@ pub struct WorkLoadInitParam {
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct ComfyUIPayload {
-    pub tx_id:u128,
+    pub promt_id:String,
     pub client_id:String,
-    pub gen_ai_node:String,
+    pub ai_node:String,
     pub app_info:String,
     pub wk_id:String,
-    pub promt_id:String,
     pub voice_key:String,
-    pub deduce_asset_key:String
+    pub deduce_asset_key:String,
+    pub status:String,
+    //Not the time of AI node, but the time on chain
+    pub gmt_datatime:Timestamp
 }
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
-pub struct WorkLoadLedger {
-    pub work_load :Vec<ComfyUIPayload>  
+pub struct WorkLoadLedgerItem {
+    pub wkload_id:BlockIndex,
+    pub work_load :ComfyUIPayload
 }
 
+#[derive(Clone, Debug, Default, CandidType, Deserialize)]
+pub struct WorkLoadLedger {
+    pub work_load_record:Vec<WorkLoadLedgerItem>
+}
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize,Serialize)]
 pub struct PromtsVecParams {
@@ -47,7 +66,9 @@ pub struct ComfyUINode {
 
 #[derive(Default,CandidType,Deserialize,Clone)]
 pub struct MixComfy{
-    pub comfy_node:Vec<ComfyUINode>   
+    pub comfy_node:Vec<ComfyUINode>,
+    pub workload_records:WorkLoadLedger,
+    pub miner_ledger:MinerRecordLedger
 }
 
 //Smart contract related
@@ -57,14 +78,14 @@ pub struct GenaiProposal {
     pub timestamp:u64,
     pub proposer:Principal,
     pub payload:ComfyUIPayload,
-    pub state:ProposalState
+    pub state:String
 }
 
 
 #[derive(CandidType)]
 pub enum MixComfyErr{
-    NoneNodeVaild,
-    RuntimeErr,
+    NoneNodeVaild (String),
+    RuntimeErr (String),
 }
 pub type OrderId = u32;
 pub type WorkloadPlacementReceipt = Result<BlockIndex, MixComfyErr>;
@@ -74,17 +95,23 @@ pub enum OrderPlacementErr {
     OrderBookFull,
 }
 
-//Can be considered as mining trxjnl
-#[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct ContractCallInstance {
-    pub caller:Principal,
-    pub prompts_id:String,
+
+
+#[derive(Clone, Debug,CandidType, Deserialize)]
+pub struct MinerRecordItem {
+    pub minner_claim_id:BlockIndex,
+    pub minner:Principal,
+    pub wkload_id:BlockIndex,
     pub client_id:String,
     pub tokens:NumTokens,
     pub gmt_create:u64,
     pub agi_result:AGIAssetresult,
-    pub state:ProposalState
+    pub state:MinerTxState
+}
 
+#[derive(Clone, Default, Debug,CandidType, Deserialize)]
+pub struct MinerRecordLedger {
+    record:Vec<MinerRecordItem>
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -96,6 +123,8 @@ pub struct AGIWkFlowNode {
 #[derive(Clone, Debug, Default,CandidType, Deserialize)]
 pub struct  AGIAssetresult {
     pub res_code:String,
-    pub asset_key:String,
+    pub asset_key:String,  // prompt and file input
+    pub prc_dataset_key:String, //Training data
+    pub aigc_asset_key:String, //AI Gen result S3 key
     pub res_message:String
 }

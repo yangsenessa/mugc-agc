@@ -36,13 +36,22 @@ type WorkLoadInitParam =
     token_block:nat;
   };
 
+type MixComfyErr = variant = {
+   NoneNodeVaild:String;
+   RuntimeErr:String;
+}
 
+type Account = record { owner : principal; subaccount : opt blob };
+type TransferArgs = record { to_account : Account; amount : nat };
 
-service :(WorkLoadInitParam) -> {
+service : {
     "greet": (text) -> (text) query;
     "query_comfy_nodes":() -> (opt vec ComfyUINode);
     "reg_comfy_nodes":(vec ComfyUINode) ->(opt vec ComfyUINode);
     "gen_ai_node_router":() ->(opt ComfyUINode);
     "record_ai_ledger":(ComfyUIPayload) -> (Result);
-    "export_minting_contract":() -> (opt WorkLoadInitParam)
+    "export_minting_contract":() -> (opt WorkLoadInitParam);
+    "update_minting_contract":(WorkLoadInitParam) -> (opt WorkLoadInitParam);
+    "transfer" : (TransferArgs) -> (Result);
+    "query_poll_balance" :() -> (Result) query;
 };
