@@ -9,6 +9,11 @@ use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
 use serde::Serialize;
 
+use icrc_ledger_types::icrc1::account::Account;
+use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
+use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
+use serde::Serialize;
+
 
 use mixcomfy_types::{ComfyUINode,MixComfyErr,MixComfy,
     WorkLoadInitParam,AGIWkFlowNode, WorkLoadLedger,ComfyUIPayload};
@@ -20,6 +25,13 @@ use ic_cdk::{
 };
 
 use ic_cdk_macros::*;
+
+#[derive(CandidType, Deserialize, Serialize)]
+pub struct TransferArgs {
+    amount: NumTokens,
+    to_account: Account,
+}
+
 
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct TransferArgs {
@@ -104,6 +116,8 @@ fn export_minting_contract()->Option<WorkLoadInitParam> {
     })
 }
 
+#[ic_cdk::update]
+fn update_minting_contract(args:WorkLoadInitParam)->Option<WorkLoadInitParam> {
 #[ic_cdk::update]
 fn update_minting_contract(args:WorkLoadInitParam)->Option<WorkLoadInitParam> {
     STATE.with(|state|{
