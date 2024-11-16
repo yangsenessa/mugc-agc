@@ -10,7 +10,8 @@ use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromErro
 use serde::Serialize;
 
 
-use mixcomfy_types::{ComfyUINode,MixComfyErr,MixComfy,WorkLoadInitParam,AGIWkFlowNode, WorkLoadLedger};
+use mixcomfy_types::{ComfyUINode,MixComfyErr,MixComfy,
+    WorkLoadInitParam,AGIWkFlowNode, WorkLoadLedger,ComfyUIPayload};
 use candid::{candid_method, export_service, Nat, Principal,CandidType, Deserialize,Encode};
 use ic_cdk::{
     api::{self, call},
@@ -182,6 +183,17 @@ async fn query_poll_balance()->Result<NumTokens,String> {
     Ok(balance)
      
 }
+
+#[ic_cdk::update]
+fn push_workload_recore(record:ComfyUIPayload) ->Result<BlockIndex,MixComfyErr>{
+    ic_cdk::println!("Push work load:{:?}", record);
+
+    STATE.with(|state|{
+        let mut state = state.borrow_mut();
+        state.mixcomfy.record_work_load(record)
+    })
+}
+
 
 
 // Enable Candid export (see https://internetcomputer.org/docs/current/developer-docs/backend/rust/generating-candid)
