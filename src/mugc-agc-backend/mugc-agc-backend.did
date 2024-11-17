@@ -17,16 +17,19 @@ type AGIAssetresult =
     res_message:text;
   };
 
+type Timestamp = nat64;
+
 type ComfyUIPayload =
   record {
-    tx_id:opt nat;
+    promt_id:text;
     client_id:text;
-    gen_ai_node:text;
+    ai_node:text;
     app_info:text;
     wk_id:text;
-    promt_id:text;
     voice_key:text;
-    pdeduce_asset_key:text;
+    deduce_asset_key:text;
+    status:text;
+    gmt_datatime:Timestamp
   };
 type Result = variant { Ok : nat; Err : text };
 
@@ -36,22 +39,46 @@ type WorkLoadInitParam =
     token_block:nat;
   };
 
-type MixComfyErr = variant = {
-   NoneNodeVaild:String;
-   RuntimeErr:String;
-}
+type BlockIndex = nat;
+
+type MinerTxState = variant {
+   Prepared:text;
+   Claimed:text
+};
+type WorkLoadLedgerItem =
+  record {
+    wkload_id : BlockIndex;
+    work_load : ComfyUIPayload;
+    mining_status : MinerTxState
+  };
+
+
+type MixComfyErr = 
+   variant {
+      NoneNodeVaild:text;
+      RuntimeErr:text;
+   };
+
+type WorkLoadReceipt = 
+    variant {
+      Err:MixComfyErr;
+      Ok:nat;
+    };
 
 type Account = record { owner : principal; subaccount : opt blob };
 type TransferArgs = record { to_account : Account; amount : nat };
+
+
 
 service : {
     "greet": (text) -> (text) query;
     "query_comfy_nodes":() -> (opt vec ComfyUINode);
     "reg_comfy_nodes":(vec ComfyUINode) ->(opt vec ComfyUINode);
     "gen_ai_node_router":() ->(opt ComfyUINode);
-    "record_ai_ledger":(ComfyUIPayload) -> (Result);
     "export_minting_contract":() -> (opt WorkLoadInitParam);
     "update_minting_contract":(WorkLoadInitParam) -> (opt WorkLoadInitParam);
     "transfer" : (TransferArgs) -> (Result);
     "query_poll_balance" :() -> (Result) query;
+    "push_workload_record":(ComfyUIPayload) -> (WorkLoadReceipt);
+    "query_curr_workload":() ->(opt vec WorkLoadLedgerItem);
 };

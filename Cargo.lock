@@ -378,6 +378,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-stable-structures"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcaf89c1bc326c72498bcc0cd954f2edf718c018e7c586d2193d701d3c9af29a"
+dependencies = [
+ "ic_principal",
+]
+
+[[package]]
 name = "ic0"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -414,6 +423,18 @@ dependencies = [
  "sha2",
  "strum",
  "time",
+]
+
+[[package]]
+name = "icrc-nft-types"
+version = "0.1.0"
+source = "git+https://github.com/pramitgaha21/icrc-nft-types.git#c0b16a95ead6912fb34758bef69b66ea210cae00"
+dependencies = [
+ "candid",
+ "ic-stable-structures",
+ "icrc-ledger-types",
+ "serde",
+ "serde_bytes",
 ]
 
 [[package]]
@@ -476,6 +497,7 @@ dependencies = [
  "ic-cdk-macros 0.14.0",
  "ic-cdk-timers",
  "icrc-ledger-types",
+ "icrc-nft-types",
  "serde",
  "serde_bytes",
  "serde_json",

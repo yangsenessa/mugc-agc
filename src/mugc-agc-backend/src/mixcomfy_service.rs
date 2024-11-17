@@ -55,11 +55,17 @@ impl MixComfy {
         let id = BlockIndex::try_from(top_index).unwrap();
         let record_item =WorkLoadLedgerItem {
             wkload_id : id.clone(),
-            work_load: record
+            work_load: record,
+            mining_status:MinerTxState::Prepared(String::from("prepared"))
         };
 
         self.workload_records.work_load_record.push(record_item);
         Ok(id)
+    }
+
+    //For dashboard
+    pub fn query_all_workload(&self) ->Option<Vec<WorkLoadLedgerItem>> {
+        Some(self.workload_records.work_load_record.clone())
     }
  
 }

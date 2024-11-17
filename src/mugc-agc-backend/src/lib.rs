@@ -7,11 +7,19 @@ use std::mem;
 use icrc_ledger_types::icrc1::account::Account;
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
+use icrc_nft_types::{
+    icrc7::{
+        metadata::{Icrc7CollectionMetadata, Icrc7TokenMetadata},
+        transfer::{TransferArg, TransferResult},
+    },
+    Account,
+};
 use serde::Serialize;
 
 
 use mixcomfy_types::{ComfyUINode,MixComfyErr,MixComfy,
-    WorkLoadInitParam,AGIWkFlowNode, WorkLoadLedger,ComfyUIPayload};
+    WorkLoadInitParam,AGIWkFlowNode, WorkLoadLedger,ComfyUIPayload,
+    WorkLoadLedgerItem};
 use candid::{candid_method, export_service, Nat, Principal,CandidType, Deserialize,Encode};
 use ic_cdk::{
     api::{self, call},
@@ -186,14 +194,26 @@ async fn query_poll_balance()->Result<NumTokens,String> {
 }
 
 #[ic_cdk::update]
-fn push_workload_recore(record:ComfyUIPayload) ->Result<BlockIndex,MixComfyErr>{
+fn push_workload_record(record:ComfyUIPayload) ->Result<BlockIndex,MixComfyErr>{
     ic_cdk::println!("Push work load:{:?}", record);
+
 
     STATE.with(|state|{
         let mut state = state.borrow_mut();
         state.mixcomfy.record_work_load(record)
     })
 }
+
+#[ic_cdk::query]
+fn query_curr_workload() ->Option<Vec<WorkLoadLedgerItem>>{
+    ic_cdk::println!("Query all workload");
+
+    STATE.with(|state|{
+        let  state = state.borrow();
+        state.mixcomfy.query_all_workload()
+    })
+}
+
 
 
 

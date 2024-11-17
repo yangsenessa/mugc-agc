@@ -1,17 +1,26 @@
 
+use std::default;
+
 use candid::{CandidType, Principal,Deserialize,Nat};
 use serde::Serialize;
 use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 
-#[derive(Clone, Debug,CandidType, Deserialize)]
 
+
+#[derive(CandidType,Deserialize,Clone)]
 pub enum MinerTxState {
-   
-    Prepared,
-
-    Claimed
+    Prepared(String),
+    Claimed(String)
 }
+
+impl Default  for MinerTxState {
+    fn default() -> Self {
+       MinerTxState::Prepared(String::from("prepared"))
+   }
+}
+
+
 
 pub type TxIndex = Nat;
 pub type Timestamp = u64;
@@ -37,13 +46,14 @@ pub struct ComfyUIPayload {
     //Not the time of AI node, but the time on chain
     pub gmt_datatime:Timestamp
 }
-#[derive(Clone, Debug, Default, CandidType, Deserialize)]
+#[derive(Clone, Default, CandidType, Deserialize)]
 pub struct WorkLoadLedgerItem {
     pub wkload_id:BlockIndex,
-    pub work_load :ComfyUIPayload
+    pub work_load :ComfyUIPayload,
+    pub mining_status:MinerTxState
 }
 
-#[derive(Clone, Debug, Default, CandidType, Deserialize)]
+#[derive(Clone, Default, CandidType, Deserialize)]
 pub struct WorkLoadLedger {
     pub work_load_record:Vec<WorkLoadLedgerItem>
 }
@@ -97,7 +107,7 @@ pub enum OrderPlacementErr {
 
 
 
-#[derive(Clone, Debug,CandidType, Deserialize)]
+#[derive(CandidType, Deserialize,Clone)]
 pub struct MinerRecordItem {
     pub minner_claim_id:BlockIndex,
     pub minner:Principal,
@@ -109,7 +119,7 @@ pub struct MinerRecordItem {
     pub state:MinerTxState
 }
 
-#[derive(Clone, Default, Debug,CandidType, Deserialize)]
+#[derive(Default,CandidType, Deserialize,Clone)]
 pub struct MinerRecordLedger {
     record:Vec<MinerRecordItem>
 }
