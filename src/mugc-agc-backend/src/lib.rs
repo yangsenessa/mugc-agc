@@ -1,14 +1,10 @@
-mod types;
 mod mixcomfy_types;
 mod mixcomfy_service;
 
 use std::{cell::RefCell, result};
 use std::mem;
-use icrc_ledger_types::icrc1::account::Account;
-use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
-use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
 
-use serde::Serialize;
+use icrc_ledger_types::icrc1::transfer::{BlockIndex};
 
 
 use mixcomfy_types::{ComfyUINode,MixComfyErr,MixComfy,
@@ -23,11 +19,7 @@ use ic_cdk::{
 
 use ic_cdk_macros::*;
 
-#[derive(CandidType, Deserialize, Serialize)]
-pub struct TransferArgs {
-    amount: NumTokens,
-    to_account: Account,
-}
+
 
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
@@ -35,7 +27,6 @@ thread_local! {
 
 #[derive(CandidType,Deserialize,Clone,Default)]
 pub struct  State {
-    owner:Option<Principal>,
     mining_contract:WorkLoadInitParam,
     mixcomfy:MixComfy,
     agic_wk_node:Vec<AGIWkFlowNode>,
@@ -47,7 +38,7 @@ struct StableState {
 }
 
 
-#[pre_upgrade]
+#[ic_cdk::pre_upgrade]
 fn pre_upgrade() {
     let state = STATE.with(|state: &RefCell<State>| mem::take(&mut *state.borrow_mut()));
     let stable_state: StableState = StableState { state };
@@ -56,7 +47,7 @@ fn pre_upgrade() {
 
 }
 
-#[post_upgrade]
+#[ic_cdk::post_upgrade]
 fn post_upgrade() {
     let (StableState { state },) = storage::stable_restore().unwrap();
     STATE.with(|state0| *state0.borrow_mut() = state);
@@ -112,7 +103,6 @@ fn update_minting_contract(args:WorkLoadInitParam)->Option<WorkLoadInitParam> {
     STATE.with(|state|{
         let mut state = state.borrow_mut();
         state.mining_contract = args.clone();
-        state.owner = Some(ic_cdk::api::caller());
         ic_cdk::println!("Owner:{:?}", state.owner);
         Some(state.mining_contract.clone()) 
     })

@@ -20,18 +20,14 @@ impl Default  for MinerTxState {
    }
 }
 
-
-
-pub type TxIndex = Nat;
-pub type Timestamp = u64;
-
-
-#[derive(Clone, Debug,CandidType, Deserialize,Default)]
+#[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct WorkLoadInitParam {
     pub poll_account:String,
     pub token_block:NumTokens
 }
 
+pub type TxIndex = Nat;
+pub type Timestamp = u64;
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct ComfyUIPayload {
@@ -50,8 +46,10 @@ pub struct ComfyUIPayload {
 pub struct WorkLoadLedgerItem {
     pub wkload_id:BlockIndex,
     pub work_load :ComfyUIPayload,
+    pub block_tokens:NumTokens,
     pub mining_status:MinerTxState
 }
+
 
 #[derive(Clone, Default, CandidType, Deserialize)]
 pub struct WorkLoadLedger {
