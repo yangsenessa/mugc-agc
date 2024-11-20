@@ -103,7 +103,6 @@ fn update_minting_contract(args:WorkLoadInitParam)->Option<WorkLoadInitParam> {
     STATE.with(|state|{
         let mut state = state.borrow_mut();
         state.mining_contract = args.clone();
-        ic_cdk::println!("Owner:{:?}", state.owner);
         Some(state.mining_contract.clone()) 
     })
 
@@ -112,10 +111,11 @@ fn update_minting_contract(args:WorkLoadInitParam)->Option<WorkLoadInitParam> {
 fn push_workload_record(record:ComfyUIPayload) ->Result<BlockIndex,MixComfyErr>{
     ic_cdk::println!("Push work load:{:?}", record);
 
-
     STATE.with(|state|{
         let mut state = state.borrow_mut();
-        state.mixcomfy.record_work_load(record)
+        let tokens = state.mining_contract.token_block.clone();
+        ic_cdk::println!("{} tokens per block", tokens);
+        state.mixcomfy.record_work_load(record,tokens)
     })
 }
 

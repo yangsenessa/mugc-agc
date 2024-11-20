@@ -8,6 +8,16 @@ dfx identity use univoicetest
 echo "===========SETUP DONE========="
 dfx deploy  mugc-agc-backend 
 
+
+
+echo "========update contract======"
+dfx canister call mugc-agc-backend update_minting_contract "(
+   record {
+      poll_account=\"mxzaz-hqaaa-aaaar-qaada-cai\";
+      token_block=1000
+   }
+)"
+
 echo "=========record_work_load========"
 dfx canister call mugc-agc-backend push_workload_record "(
     record {

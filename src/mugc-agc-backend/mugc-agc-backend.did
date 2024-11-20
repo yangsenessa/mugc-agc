@@ -40,6 +40,7 @@ type WorkLoadInitParam =
   };
 
 type BlockIndex = nat;
+type NumTokens = nat;
 
 type MinerTxState = variant {
    Prepared:text;
@@ -49,6 +50,7 @@ type WorkLoadLedgerItem =
   record {
     wkload_id : BlockIndex;
     work_load : ComfyUIPayload;
+    block_tokens: NumTokens;
     mining_status : MinerTxState
   };
 
