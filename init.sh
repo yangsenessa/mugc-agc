@@ -1,4 +1,4 @@
-dfx stop
+#dfx stop
 set -ex
 #trap 'dfx stop' EXIT
 echo "===========SETUP========="
@@ -14,6 +14,7 @@ echo "========update contract======"
 dfx canister call mugc-agc-backend update_minting_contract "(
    record {
       poll_account=\"mxzaz-hqaaa-aaaar-qaada-cai\";
+      nft_collection_id=\"bkyz2-fmaaa-aaaaa-qaaaq-cai\";
       token_block=1000
    }
 )"

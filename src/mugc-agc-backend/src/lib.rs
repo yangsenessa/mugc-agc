@@ -3,6 +3,8 @@ mod mixcomfy_service;
 
 use std::{cell::RefCell, result};
 use std::mem;
+use std::collections::BTreeMap;
+
 
 use icrc_ledger_types::icrc1::transfer::{BlockIndex};
 
@@ -17,12 +19,22 @@ use ic_cdk::{
     caller,
 };
 
-use ic_cdk_macros::*;
+#[derive(Clone, Debug, CandidType, Deserialize)]
+struct Subscriber {
+    topic: String,
+}
+type SubscriberStore = BTreeMap<Principal, Subscriber>;
 
+#[derive(Clone, CandidType, Deserialize)]
+struct Event0301008 {
+    topic:String,
+    payload:WorkLoadLedgerItem
+}
 
 
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
+    static SUBSCRIBERS: RefCell<SubscriberStore> = RefCell::default();
 }
 
 #[derive(CandidType,Deserialize,Clone,Default)]
@@ -49,7 +61,9 @@ fn pre_upgrade() {
 
 #[ic_cdk::post_upgrade]
 fn post_upgrade() {
-    let (StableState { state },) = storage::stable_restore().unwrap();
+    ic_cdk::println!("post_upgrade");
+    let (StableState { state },) = storage::stable_restore()
+                                              .expect("failed to restore stable state");
     STATE.with(|state0| *state0.borrow_mut() = state);
     ic_cdk::println!("post_upgrade");
 
@@ -107,16 +121,51 @@ fn update_minting_contract(args:WorkLoadInitParam)->Option<WorkLoadInitParam> {
     })
 
 }
+
 #[ic_cdk::update]
-fn push_workload_record(record:ComfyUIPayload) ->Result<BlockIndex,MixComfyErr>{
+fn subscribe(subscriber: Subscriber) {
+    let subscriber_principal_id = ic_cdk::caller();
+    SUBSCRIBERS.with(|subscribers| {
+        subscribers
+            .borrow_mut()
+            .insert(subscriber_principal_id, subscriber)
+    });
+}
+
+
+#[ic_cdk::update]
+fn push_workload_record(record:ComfyUIPayload) ->Result<WorkLoadLedgerItem,MixComfyErr>{
     ic_cdk::println!("Push work load:{:?}", record);
 
-    STATE.with(|state|{
+    let result = STATE.with(|state|{
         let mut state = state.borrow_mut();
         let tokens = state.mining_contract.token_block.clone();
         ic_cdk::println!("{} tokens per block", tokens);
         state.mixcomfy.record_work_load(record,tokens)
-    })
+       
+    });
+    match result {
+        Ok(block) => {
+            SUBSCRIBERS.with(|s|{
+                let event = Event0301008 {
+                    topic :  String::from("0301008"),
+                    payload : block.clone()
+                };
+                for (k,v) in s.borrow().iter() {
+                    if v.topic == event.topic {
+                        let _call_result: Result<(), _> =
+                        ic_cdk::notify(*k, "publish_0301008", (&event,));
+                    }
+                }
+                Ok(block)
+            }) 
+
+       },
+    Err(e) =>  Err(e),
+        
+    }
+
+
 }
 
 

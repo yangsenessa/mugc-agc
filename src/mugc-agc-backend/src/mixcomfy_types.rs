@@ -23,10 +23,10 @@ impl Default  for MinerTxState {
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct WorkLoadInitParam {
     pub poll_account:String,
+    pub nft_collection_id:String,
     pub token_block:NumTokens
 }
 
-pub type TxIndex = Nat;
 pub type Timestamp = u64;
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]

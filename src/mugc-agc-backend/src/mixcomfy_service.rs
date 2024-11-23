@@ -49,7 +49,7 @@ impl MixComfy {
     }
 
     //For minning
-    pub fn record_work_load(&mut self, record:ComfyUIPayload, token_block:NumTokens) ->Result<BlockIndex,MixComfyErr> {
+    pub fn record_work_load(&mut self, record:ComfyUIPayload, token_block:NumTokens) ->Result<WorkLoadLedgerItem,MixComfyErr> {
 
         let top_index = self.workload_records.work_load_record.len() +1;
         let id = BlockIndex::try_from(top_index).unwrap();
@@ -60,8 +60,8 @@ impl MixComfy {
             mining_status:MinerTxState::Prepared(String::from("prepared"))
         };
 
-        self.workload_records.work_load_record.push(record_item);
-        Ok(id)
+        self.workload_records.work_load_record.push(record_item.clone());
+        Ok(record_item)
     }
 
     //For dashboard

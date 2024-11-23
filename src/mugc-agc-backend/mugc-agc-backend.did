@@ -36,6 +36,7 @@ type Result = variant { Ok : nat; Err : text };
 type WorkLoadInitParam = 
   record {
     poll_account:text;
+    nft_collection_id:text;
     token_block:nat;
   };
 
@@ -53,6 +54,10 @@ type WorkLoadLedgerItem =
     block_tokens: NumTokens;
     mining_status : MinerTxState
   };
+type Subscriber = record {
+    topic:text;
+  };
+
 
 
 type MixComfyErr = 
@@ -64,7 +69,7 @@ type MixComfyErr =
 type WorkLoadReceipt = 
     variant {
       Err:MixComfyErr;
-      Ok:nat;
+      Ok:WorkLoadLedgerItem;
     };
 
 type Account = record { owner : principal; subaccount : opt blob };
@@ -83,4 +88,6 @@ service : {
     "query_poll_balance" :() -> (Result) query;
     "push_workload_record":(ComfyUIPayload) -> (WorkLoadReceipt);
     "query_curr_workload":() ->(opt vec WorkLoadLedgerItem);
+    "subscribe": (subscriber:Subscriber) -> ();
+
 };
