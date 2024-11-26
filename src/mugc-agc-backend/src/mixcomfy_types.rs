@@ -47,6 +47,8 @@ pub struct WorkLoadLedgerItem {
     pub wkload_id:BlockIndex,
     pub work_load :ComfyUIPayload,
     pub block_tokens:NumTokens,
+    pub token_pool:String,
+    pub nft_pool:String,
     pub mining_status:MinerTxState
 }
 

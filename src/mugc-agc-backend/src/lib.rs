@@ -140,8 +140,10 @@ fn push_workload_record(record:ComfyUIPayload) ->Result<WorkLoadLedgerItem,MixCo
     let result = STATE.with(|state|{
         let mut state = state.borrow_mut();
         let tokens = state.mining_contract.token_block.clone();
+        let token_pool = state.mining_contract.poll_account.clone();
+        let nft_pool = state.mining_contract.nft_collection_id.clone();
         ic_cdk::println!("{} tokens per block", tokens);
-        state.mixcomfy.record_work_load(record,tokens)
+        state.mixcomfy.record_work_load(record,tokens,token_pool, nft_pool)
        
     });
     match result {

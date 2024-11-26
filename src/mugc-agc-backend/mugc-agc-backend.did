@@ -52,6 +52,8 @@ type WorkLoadLedgerItem =
     wkload_id : BlockIndex;
     work_load : ComfyUIPayload;
     block_tokens: NumTokens;
+    token_pool:text;
+    nft_pool:text;
     mining_status : MinerTxState
   };
 type Subscriber = record {
