@@ -4,6 +4,8 @@ mod mixcomfy_service;
 use std::{cell::RefCell, result};
 use std::mem;
 use std::collections::BTreeMap;
+use std::time::Duration;
+
 
 
 use icrc_ledger_types::icrc1::transfer::{BlockIndex};
@@ -18,6 +20,9 @@ use ic_cdk::{
     storage,
     caller,
 };
+
+const TIMER_INTERVAL_SEC: u64 = 3*2;
+
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 struct Subscriber {
@@ -179,6 +184,13 @@ fn query_curr_workload() ->Option<Vec<WorkLoadLedgerItem>>{
         let  state = state.borrow();
         state.mixcomfy.query_all_workload()
     })
+}
+
+fn setup_timer() {
+    ic_cdk_timers::set_timer_interval(Duration:from_sec(TIMER_INTERVAL_SEC), || {
+        ic_cdk::print("Creating block");
+        ic_cdk::trap("timer trap");
+    });
 }
 
 // Enable Candid export (see https://internetcomputer.org/docs/current/developer-docs/backend/rust/generating-candid)
