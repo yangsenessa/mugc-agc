@@ -21,7 +21,7 @@ use ic_cdk::{
     caller,
 };
 
-const TIMER_INTERVAL_SEC: u64 = 3*2;
+const TIMER_INTERVAL_SEC: u64 = 3*5;
 
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -187,10 +187,36 @@ fn query_curr_workload() ->Option<Vec<WorkLoadLedgerItem>>{
 }
 
 fn setup_timer() {
-    ic_cdk_timers::set_timer_interval(Duration:from_sec(TIMER_INTERVAL_SEC), || {
+    ic_cdk_timers::set_timer_interval(Duration::from_secs(TIMER_INTERVAL_SEC), || {
         ic_cdk::print("Creating block");
-        ic_cdk::trap("timer trap");
+        let work_load:ComfyUIPayload = ComfyUIPayload {
+            promt_id:String::from("086daeb4-3795-486a-8d20-725866f4ded9"),
+            client_id:String::from("1982027079"),
+            ai_node:String::from("http://127.0.0.1:8188/prompt"),
+            app_info:String::from("miner_test"),
+            wk_id:String::from("test.json"),
+            voice_key:String::from("2f4018e2-ed5e-4821-97ba-4873b431586f/tmp/tmprh7jbr_7.wav"),
+            deduce_asset_key:String::from("testkey"),
+            status:String::from("executed"),
+            gmt_datatime:ic_cdk::api::time()
+        };
+        let res = push_workload_record(work_load);
+        match res {
+            Result::Ok(ledger) =>{
+                ic_cdk::println!("Create block ok")
+
+            }
+            Result::Err(e)=>{
+                ic_cdk::println!("Create block error")
+
+            }
+        }
     });
+}
+
+#[ic_cdk::init]
+fn init() {
+    setup_timer();
 }
 
 // Enable Candid export (see https://internetcomputer.org/docs/current/developer-docs/backend/rust/generating-candid)
