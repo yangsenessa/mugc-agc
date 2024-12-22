@@ -27,7 +27,7 @@ const TIMER_INTERVAL_SEC: u64 = 60*15;
 #[derive(Clone, Debug, CandidType, Deserialize)]
 struct Subscriber {
     topic: String,
-}
+} 
 type SubscriberStore = BTreeMap<Principal, Subscriber>;
 
 #[derive(Clone, CandidType, Deserialize)]
