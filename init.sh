@@ -4,7 +4,7 @@ set -ex
 echo "===========SETUP========="
 dfx start --background --clean
 
-dfx identity use univoicetest
+dfx identity use univoicerun
 echo "===========SETUP DONE========="
 dfx deploy  mugc-agc-backend 
 

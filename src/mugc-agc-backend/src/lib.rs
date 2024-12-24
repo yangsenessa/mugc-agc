@@ -21,7 +21,7 @@ use ic_cdk::{
     caller,
 };
 
-const TIMER_INTERVAL_SEC: u64 = 60*15;
+const TIMER_INTERVAL_SEC: u64 = 60*2;
 
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
