@@ -92,4 +92,4 @@ service : {
     "query_curr_workload":() ->(opt vec WorkLoadLedgerItem);
     "subscribe": (subscriber:Subscriber) -> ();
 
-};
+}
