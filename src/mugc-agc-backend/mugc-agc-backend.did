@@ -87,7 +87,6 @@ service : {
     "export_minting_contract":() -> (opt WorkLoadInitParam);
     "update_minting_contract":(WorkLoadInitParam) -> (opt WorkLoadInitParam);
     "transfer" : (TransferArgs) -> (Result);
-    "query_poll_balance" :() -> (Result) query;
     "push_workload_record":(ComfyUIPayload) -> (WorkLoadReceipt);
     "query_curr_workload":() ->(opt vec WorkLoadLedgerItem);
     "subscribe": (subscriber:Subscriber) -> ();
