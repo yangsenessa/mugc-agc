@@ -14,7 +14,7 @@ echo "========update contract======"
 dfx canister call mugc-agc-backend update_minting_contract "(
    record {
       poll_account=\"mxzaz-hqaaa-aaaar-qaada-cai\";
-      nft_collection_id=\"bkyz2-fmaaa-aaaaa-qaaaq-cai\";
+      nft_collection_id=\"br5f7-7uaaa-aaaaa-qaaca-cai\";
       token_block=1000
    }
 )"
