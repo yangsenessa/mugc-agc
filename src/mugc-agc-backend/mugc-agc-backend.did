@@ -90,5 +90,7 @@ service : {
     "push_workload_record":(ComfyUIPayload) -> (WorkLoadReceipt);
     "query_curr_workload":() ->(opt vec WorkLoadLedgerItem);
     "subscribe": (subscriber:Subscriber) -> ();
+    "initialize_rustpotter": () -> (text) query;
+    "detect_hotword": (vec nat8) -> (record{detected: bool; timestamp: opt nat64}) query;
 
 }
