@@ -77,6 +77,14 @@ type WorkLoadReceipt =
 type Account = record { owner : principal; subaccount : opt blob };
 type TransferArgs = record { to_account : Account; amount : nat };
 
+type InitRequest = record {
+    detection_threshold: float32;
+    sample_rate: nat32;
+};
+
+type InitResponse = record {
+    message: text;
+};
 
 
 service : {
@@ -90,7 +98,8 @@ service : {
     "push_workload_record":(ComfyUIPayload) -> (WorkLoadReceipt);
     "query_curr_workload":() ->(opt vec WorkLoadLedgerItem);
     "subscribe": (subscriber:Subscriber) -> ();
-    "initialize_rustpotter": () -> (text) query;
-    "detect_hotword": (vec nat8) -> (record{detected: bool; timestamp: opt nat64}) query;
+    "initialize_rustpotter": (InitRequest) -> (InitResponse) query;
+    "detect_hotword": (vec int16) -> (text) query;
+    "status": () -> (text) query;
 
 }

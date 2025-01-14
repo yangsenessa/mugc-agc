@@ -4,6 +4,7 @@ mod mixcomfy_service;
 use std::{cell::RefCell, result};
 use std::mem;
 use std::collections::BTreeMap;
+use std::fmt::format;
 use std::time::Duration;
 
 use icrc_ledger_types::icrc1::transfer::{BlockIndex};
@@ -18,7 +19,10 @@ use ic_cdk::{
 };
 
 use std::fs::File;
-use rustpotter::{DetectionConfig, Rustpotter};
+use std::sync::Mutex;
+use rustpotter::{RustpotterConfig, DetectorConfig, Rustpotter};
+use lazy_static::lazy_static;
+use serde::{Serialize};
 
 const TIMER_INTERVAL_SEC: u64 = 60 * 2;
 
@@ -36,11 +40,13 @@ struct Event0301008 {
     payload: WorkLoadLedgerItem,
 }
 
+lazy_static! {
+    static ref RUSTPOTTER_INSTANCE: Mutex<Option<Rustpotter>> = Mutex::new(None);
+}
 
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
     static SUBSCRIBERS: RefCell<SubscriberStore> = RefCell::default();
-    static RUSTPOTTER: RefCell<Option<Rustpotter>> = RefCell::new(None);
 }
 
 #[derive(CandidType, Deserialize, Clone, Default)]
@@ -56,9 +62,15 @@ struct StableState {
     state: State,
 }
 
-struct DetectionResult {
-    detected: bool,
-    timestamp: Option<u64>,
+#[derive(CandidType, Deserialize, Debug)]
+pub struct InitRequest {
+    pub detection_threshold: f32,
+    pub sample_rate: u32
+}
+
+#[derive(CandidType, Serialize, Debug)]
+pub struct InitResponse {
+    pub message: String
 }
 
 #[ic_cdk::pre_upgrade]
@@ -212,42 +224,48 @@ fn setup_timer() {
 }
 
 #[update]
-#[candid_method(update)]
-async fn initialize_rustpotter() -> String {
-    RUSTPOTTER.with(|mut rustpotter| {
-        let mut instance = rustpotter.borrow_mut();
-        if instance.is_none() {
-            let mut rustpotter_instance = Rustpotter::new(DetectionConfig::default());
-            let model_path = "";
-            let mut model_file = File::open(model_path).expect("Could not open model file");
-            rustpotter_instance.add_hotword(&mut model_file).expect("Failed to load hotword model");
-            *instance = Some(rustpotter_instance);
-        }
-    });
+pub fn initialize_rustpotter(req: InitRequest) -> Result<InitResponse, String> {
+    let detector_config = DetectorConfig {
+        detection_threshold: req.detection_threshold,
+        sample_rate: req.sample_rate,
+        ..Default::default()
+    };
 
-    "Rustpotter initialized".to_string()
+    let rustpotter_config = RustpotterConfig {
+        detector_config,
+        ..Default::default()
+    };
+
+    let rustpotter_instance = Rustpotter::new(&rustpotter_config).map_err(|e| format!("Failed to initialize Rustpotter: {}", e))?;
+    let mut instance_lock = RUSTPOTTER_INSTANCE.lock().map_err(|_| "Failed to lock Rustpotter instance")?;
+    *instance_lock = Some(rustpotter_instance);
+
+    Ok(InitResponse{
+        message: "Rustpotter initialized successfully".to_string(),
+    });
 }
 
 async fn detect_hotword(audio: Vec<u8>) -> DetectionResult {
-    RUSTPOTTER.with (|rustpotter| {
-        let instance = rustpotter.borrow();
-        if let Some(rustpotter_instance) = instance.as_ref() {
-            let detections = rustpotter_instance.process_audio_bytes(&audio).unwrap_or_default();
+    let mut instance_lock = RUSTPOTTER_INSTANCE.lock().map_err(|_| "Failed to lock Rustpotter instance")?;
+    let rustpotter_instance = instance_lock.as_mut().ok_or("Rustpotter is not initialized")?;
 
-            if !detections.is_empty() {
-                let detection = &detections[0];
-                return DetectionResult {
-                    detected: true,
-                    timestamp: Some(detection.timestamp),
-                };
-            }
-        }
+    let detection_result = rustpotter_instance.process_samples(&audio_samples);
 
-        DetectionResult {
-            detected: false,
-            timestamp: None,
-        }
-    });
+    match detection_result {
+        Ok(Some(hotword)) => Ok(format!("Hotword detected: {}", hotword.label)),
+        Ok(None) => Ok("No hotword detected".to_string()),
+        Err(err) => Err(format!("Error during hotword detection: {}", err)),
+    }
+}
+
+#[query]
+pub fn status() -> String {
+    let instance_lock = RUSTPOTTER_INSTANCE.lock().map_err(|_| "Failed to lock Rustpotter instance").ok();
+    if let Some(Some(_)) = instance_lock {
+        "Rustpotter is initialized".to_string()
+    } else {
+        "Rustpotter is not initialized".to_string()
+    }
 }
 
 #[ic_cdk::init]
