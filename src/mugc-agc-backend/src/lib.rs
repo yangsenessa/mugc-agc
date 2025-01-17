@@ -1,5 +1,6 @@
 mod mixcomfy_types;
 mod mixcomfy_service;
+mod load_workflow;
 
 use std::{cell::RefCell, result};
 use std::mem;
@@ -21,7 +22,7 @@ use ic_cdk::{
     caller,
 };
 
-const TIMER_INTERVAL_SEC: u64 = 60*2;
+const TIMER_INTERVAL_SEC: u64 = 60*10;
 
 
 #[derive(Clone, Debug, CandidType, Deserialize)]

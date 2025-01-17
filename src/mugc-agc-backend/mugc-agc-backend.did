@@ -56,6 +56,15 @@ type WorkLoadLedgerItem =
     nft_pool:text;
     mining_status : MinerTxState
   };
+
+  type WorkflowLedgerItem = record {
+    principal_id: principal;
+    client_id: text;
+    workflow_id: text;
+    timestamp: Timestamp;
+    token_reward: NumTokens;
+    status: text;
+  };
 type Subscriber = record {
     topic:text;
   };
