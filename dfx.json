@@ -3,7 +3,8 @@
     "mugc-agc-backend": {
       "candid": "src/mugc-agc-backend/mugc-agc-backend.did",
       "package": "mugc-agc-backend",
-      "type": "rust"
+      "type": "rust",
+      "assets": ["alexa.rpw"]
     },
     "mugc-agc-frontend": {
       "dependencies": [
