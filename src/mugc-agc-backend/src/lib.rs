@@ -11,7 +11,7 @@ use std::time::Duration;
 use icrc_ledger_types::icrc1::transfer::{BlockIndex};
 use mixcomfy_types::{ComfyUINode, MixComfyErr, MixComfy,
                      WorkLoadInitParam, AGIWkFlowNode, WorkLoadLedger, ComfyUIPayload,
-                     WorkLoadLedgerItem};
+                     WorkLoadLedgerItem, UploaderPowContractInput};
 use candid::{candid_method, export_service, Nat, Principal, CandidType, Deserialize, Encode};
 use ic_cdk::{
     api::{self, call},
@@ -42,7 +42,7 @@ thread_local! {
 
 #[derive(CandidType, Deserialize, Clone, Default)]
 pub struct State {
-    mining_contract: WorkLoadInitParam,
+    // Remove mining_contract from State
     mixcomfy: MixComfy,
     agic_wk_node: Vec<AGIWkFlowNode>,
     work_load_ledger: WorkLoadLedger,
@@ -54,22 +54,22 @@ struct StableState {
 }
 
 
-#[ic_cdk::pre_upgrade]
-fn pre_upgrade() {
-    let state = STATE.with(|state: &RefCell<State>| mem::take(&mut *state.borrow_mut()));
-    let stable_state: StableState = StableState { state };
-    ic_cdk::println!("pre_upgrade");
-    storage::stable_save((stable_state, )).unwrap();
-}
+// #[ic_cdk::pre_upgrade]
+// fn pre_upgrade() {
+//     let state = STATE.with(|state: &RefCell<State>| mem::take(&mut *state.borrow_mut()));
+//     let stable_state: StableState = StableState { state };
+//     ic_cdk::println!("pre_upgrade");
+//     storage::stable_save((stable_state, )).unwrap();
+// }
 
-#[ic_cdk::post_upgrade]
-fn post_upgrade() {
-    ic_cdk::println!("post_upgrade");
-    let (StableState { state }, ) = storage::stable_restore()
-        .expect("failed to restore stable state");
-    STATE.with(|state0| *state0.borrow_mut() = state);
-    ic_cdk::println!("post_upgrade");
-}
+// #[ic_cdk::post_upgrade]
+// fn post_upgrade() {
+//     ic_cdk::println!("post_upgrade");
+//     let (StableState { state }, ) = storage::stable_restore()
+//         .expect("failed to restore stable state");
+//     STATE.with(|state0| *state0.borrow_mut() = state);
+//     ic_cdk::println!("post_upgrade");
+// }
 
 
 #[ic_cdk::query]
@@ -109,19 +109,16 @@ fn gen_ai_node_router() -> Option<ComfyUINode> {
 
 #[ic_cdk::query]
 fn export_minting_contract() -> Option<WorkLoadInitParam> {
-    STATE.with(|s| {
-        Some(s.borrow().mining_contract.clone())
-    })
+    load_workflow::export_minting_contract()
 }
 
 
 #[ic_cdk::update]
 fn update_minting_contract(args: WorkLoadInitParam) -> Option<WorkLoadInitParam> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
-        state.mining_contract = args.clone();
-        Some(state.mining_contract.clone())
-    })
+    match load_workflow::store_workload_init_param(args.clone()) {
+        Ok(_) => Some(args),
+        Err(_) => None
+    }
 }
 
 #[ic_cdk::update]
@@ -141,11 +138,15 @@ fn push_workload_record(record: ComfyUIPayload) -> Result<WorkLoadLedgerItem, Mi
 
     let result = STATE.with(|state| {
         let mut state = state.borrow_mut();
-        let tokens = state.mining_contract.token_block.clone();
-        let token_pool = state.mining_contract.poll_account.clone();
-        let nft_pool = state.mining_contract.nft_collection_id.clone();
+        let workload_params = load_workflow::export_minting_contract();
+        let (tokens, token_pool, nft_pool) = match workload_params {
+            Some(params) => (params.token_block, params.poll_account, params.nft_collection_id),
+            None => return Err(MixComfyErr::NoneContract(String::from("No workload parameters found"))),
+        };
         ic_cdk::println!("{} tokens per block", tokens);
-        state.mixcomfy.record_work_load(record, tokens, token_pool, nft_pool)
+        load_workflow::store_uploader_pow(record.clone(),tokens.clone()).map_err(|e| MixComfyErr::NoneContract(e))?;
+        state.mixcomfy.record_work_load(record, tokens.clone(), token_pool, nft_pool)
+
     });
     match result {
         Ok(block) => {
@@ -178,6 +179,11 @@ fn query_curr_workload() -> Option<Vec<WorkLoadLedgerItem>> {
     })
 }
 
+#[ic_cdk::update]
+fn store_uploader_pow_contract(contract_input: UploaderPowContractInput) -> Result<(), String> {
+    load_workflow::store_or_update_uploader_pow_contract(contract_input)
+}
+
 fn setup_timer() {
     ic_cdk_timers::set_timer_interval(Duration::from_secs(TIMER_INTERVAL_SEC), || {
         ic_cdk::print("Creating block");
@@ -204,10 +210,20 @@ fn setup_timer() {
     });
 }
 
+#[ic_cdk::update]
+fn store_workflow_data(principal_id: String, prompt_json: String) -> Result<String, String> {
+    load_workflow::store_workflow_data(principal_id, prompt_json)
+}
+
+#[ic_cdk::query]
+fn fetch_workflow_data(workflow_id: String) -> String {
+   return load_workflow::fetch_workflow_data(workflow_id)
+}
+
 
 #[ic_cdk::init]
 fn init() {
-    setup_timer();
+   // setup_timer();
 }
 
 // Enable Candid export (see https://internetcomputer.org/docs/current/developer-docs/backend/rust/generating-candid)
