@@ -5,6 +5,7 @@ import TopBar from '@/components/topbar'
 import FootBar from '@/components/footbar'
 import ImgService from '@/assets/imgs/Services@2x.png'
 import ImgAiAgentIcon from '@/assets/imgs/AIAgenticon@2x.png'
+import ImgCoCreatingIcon from '@/assets/imgs/creatingicon@2x.png'
 import ImgArrowRIcon from '@/assets/imgs/icon_arrow_r.png'
 import ImgPlugLogo from '@/assets/imgs/plug.png'
 import ImgICPLogo from '@/assets/imgs/ICP_logo@2x.png'
@@ -55,6 +56,9 @@ function UvHomePage() {
   }
   const goVision = () => {
     refVision.current.scrollIntoView(true)
+  }
+  const goCoCreating = () => {
+    navigate('/cocreating')
   }
 
   // const goWhitePaper = () => {
@@ -119,7 +123,18 @@ function UvHomePage() {
                 <img src={ImgArrowRIcon} className={style.icon} />
               </div>
             </div>
-
+            <div className={style.panel}>
+              <img src={ImgCoCreatingIcon} className={style.img} />
+              <div className={style.title}>Co-creating</div>
+              <div className={style.intro}>
+                <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+                <div className={style.lnk_learn_more} onClick={goCoCreating}>learn more ...</div>
+              </div>
+              <div className={`${style.btn} btn-link-1`} onClick={startCoCreating}>
+                <div>Start</div>
+                <img src={ImgArrowRIcon} className={style.icon} />
+              </div>
+            </div>
           </div>
           
           <div className={`${style.home_3} uv-container-1`} ref={refPartner}>
