@@ -133,10 +133,6 @@ const TopBar = (props:any, ref:any) => {
                 </div>
               </div>
               <div className={style.r}>
-                <div className={style.label}>Univoice Balance</div>
-                <div className={style.balance}>{fmtUvBalance(getBalance())}</div>
-              </div>
-              <div className={style.r}>
                 <div className={style.myuv_border} onClick={clickMyUnivoice}>
                   <div className={style.myuv}>
                     <div>My Univoice</div>

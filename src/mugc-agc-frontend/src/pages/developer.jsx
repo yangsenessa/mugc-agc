@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Developer.css';
+import './developer.module.scss';
 
 const Developer = () => {
     const [workflowJson, setWorkflowJson] = useState('');
