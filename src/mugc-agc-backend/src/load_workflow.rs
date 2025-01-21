@@ -1,3 +1,4 @@
+
 use candid::{Nat, Principal};
 use ic_cdk_macros::{init, query, update};
 use ic_stable_structures::{
@@ -235,5 +236,42 @@ pub fn store_workload_init_param(param: WorkLoadInitParam) -> Result<(), String>
         // Store new parameter
         params.push(&param)
             .map_err(|e| format!("Failed to store workload init param: {}", e))
+    })
+}
+
+/// Queries the workflow ledger to retrieve all ledger items associated with a specific principal ID
+///
+/// # Arguments
+/// * `principal_id` - A string representing the principal ID to query for
+///
+/// # Returns
+/// * `Result<Vec<WorkflowLedgerItem>, String>` - Returns Ok with a vector of WorkflowLedgerItem if found,
+///   or Err with error message if no items found
+///
+/// # Examples
+/// ```
+/// let principal_id = "abc123".to_string();
+/// match query_workflow_ledger_by_principal(principal_id) {
+///     Ok(items) => {
+///         for item in items {
+///             println!("Found workflow: {}", item.workflow_id);
+///         }
+///     },
+///     Err(e) => println!("Error: {}", e)
+/// }
+/// ```
+pub fn query_workflow_ledger_by_principal(principal_id: String) -> Result<Vec<WorkflowLedgerItem>, String> {
+    WORKFLOW_LEDGER.with(|ledger| {
+        let ledger = ledger.borrow();
+        let items: Vec<WorkflowLedgerItem> = (0..ledger.len())
+            .filter_map(|i| ledger.get(i))
+            .filter(|item| item.principal_id == principal_id)
+            .collect();
+        
+        if items.is_empty() {
+            Err("No workflow ledger items found for the given principal_id".to_string())
+        } else {
+            Ok(items)
+        }
     })
 }

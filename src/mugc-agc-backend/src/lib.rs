@@ -220,6 +220,11 @@ fn fetch_workflow_data(workflow_id: String) -> String {
    return load_workflow::fetch_workflow_data(workflow_id)
 }
 
+#[ic_cdk::query]
+fn query_workflow_ledger_by_principal_id(principal_id: String) -> Result<Vec<WorkLoadLedgerItem>, String> {
+    load_workflow::query_workflow_ledger_by_principal(principal_id)
+}
+
 
 #[ic_cdk::init]
 fn init() {

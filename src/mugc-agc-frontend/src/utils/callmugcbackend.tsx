@@ -14,7 +14,7 @@
 
 
 import { mugc_agc_backend } from "declarations/mugc-agc-backend";
-import { UploaderPowContractInput } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+import { UploaderPowContractInput, WorkLoadLedgerItem } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
 import { isLocalNet } from '@/utils/env';
 
 // Mode
@@ -53,5 +53,20 @@ export async function storeUploaderPowContract(input: UploaderPowContractInput):
         return result;
     } catch (error) {
         return { Err: `Failed to store uploader POW contract: ${error.message}` };
+    }
+}
+
+/**
+ * Queries workflow ledger entries for a specific principal ID
+ * @param principalId - The principal ID to query workflows for
+ * @returns A promise that resolves to either {Ok: WorkLoadLedgerItem[]} or {Err: string}
+ * @throws Will return an error object if the backend call fails
+ */
+export async function query_workflow_ledger_by_principal_id(principalId: string): Promise<{ Ok: Array<WorkLoadLedgerItem> } | { Err: string }> {
+    try {
+        const result = await mugc_agc_backend.query_workflow_ledger_by_principal_id(principalId);
+        return result;
+    } catch (error) {
+        return { Err: `Failed to query workflow ledger: ${error.message}` };
     }
 }
