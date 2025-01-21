@@ -11,7 +11,7 @@ use std::time::Duration;
 use icrc_ledger_types::icrc1::transfer::{BlockIndex};
 use mixcomfy_types::{ComfyUINode, MixComfyErr, MixComfy,
                      WorkLoadInitParam, AGIWkFlowNode, WorkLoadLedger, ComfyUIPayload,
-                     WorkLoadLedgerItem, UploaderPowContractInput};
+                     WorkLoadLedgerItem, UploaderPowContractInput, WorkflowLedgerItem};
 use candid::{candid_method, export_service, Nat, Principal, CandidType, Deserialize, Encode};
 use ic_cdk::{
     api::{self, call},
@@ -221,7 +221,7 @@ fn fetch_workflow_data(workflow_id: String) -> String {
 }
 
 #[ic_cdk::query]
-fn query_workflow_ledger_by_principal_id(principal_id: String) -> Result<Vec<WorkLoadLedgerItem>, String> {
+fn query_workflow_ledger_by_principal_id(principal_id: String) -> Result<Vec<WorkflowLedgerItem>, String> {
     load_workflow::query_workflow_ledger_by_principal(principal_id)
 }
 

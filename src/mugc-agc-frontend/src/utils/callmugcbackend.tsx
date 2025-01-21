@@ -14,7 +14,7 @@
 
 
 import { mugc_agc_backend } from "declarations/mugc-agc-backend";
-import { UploaderPowContractInput, WorkLoadLedgerItem } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+import { UploaderPowContractInput, WorkLoadLedgerItem, WorkflowLedgerItem } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
 import { isLocalNet } from '@/utils/env';
 
 // Mode
@@ -62,7 +62,7 @@ export async function storeUploaderPowContract(input: UploaderPowContractInput):
  * @returns A promise that resolves to either {Ok: WorkLoadLedgerItem[]} or {Err: string}
  * @throws Will return an error object if the backend call fails
  */
-export async function query_workflow_ledger_by_principal_id(principalId: string): Promise<{ Ok: Array<WorkLoadLedgerItem> } | { Err: string }> {
+export async function query_workflow_ledger_by_principal_id(principalId: string): Promise<{ Ok: Array<WorkflowLedgerItem> } | { Err: string }> {
     try {
         const result = await mugc_agc_backend.query_workflow_ledger_by_principal_id(principalId);
         return result;

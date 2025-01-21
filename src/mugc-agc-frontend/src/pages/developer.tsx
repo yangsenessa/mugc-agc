@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import './developer.module.scss';
 import style from './developer.module.scss'
-import {storeWorkflowData,storeUploaderPowContract} from "@/utils/callmugcbackend"
+import {storeWorkflowData, storeUploaderPowContract, query_workflow_ledger_by_principal_id} from "@/utils/callmugcbackend"
+import Paging from '@/components/paging';
+import { UploaderPowContractInput, WorkLoadLedgerItem, WorkflowLedgerItem } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
 import { useAcountStore } from '@/stores/user';
 import {reConnectPlug} from '@/utils/icplug';
+import { showToast } from '@/components/toast';
+
 
 
 
@@ -20,7 +24,13 @@ const Developer = () => {
     const [sampleOutput, setSampleOutput] = useState('');
     const [identityGusserrLimit, setIdentityGusserrLimit] = useState(0.3);
     const [workflowId, setWorkflowId] = useState('');
-    const [ledgerItems, setLedgerItems] = useState<Array<WorkLoadLedgerItem>>([]);
+    const [ledgerItems, setLedgerItems] = useState<Array<WorkflowLedgerItem>>([]);
+    
+    const [assetsData, setAssetsData] = useState([]);
+    const [assetsPage, setAssetsPage] = useState({
+        pageNum: 0,
+        totalPage: 0
+      });
 
     const { setUserByPlugWallet, getPrincipal, getWalletType } = useAcountStore();
 
@@ -58,18 +68,18 @@ const Developer = () => {
             storeWorkflowData(getPrincipal(), workflowJson).then((result) => {
                 console.log('storeWorkflowData done, result:', result);
                 if ('Ok' in result) {
-                    setProcessInfo('Workflow stored successfully,workflowid : ' + result.Ok);
+                    showToast('Workflow stored successfully,workflowid : ' + result.Ok, 'info');
                     setWorkflowId(result.Ok);
                 } else if ('Err' in result) {
-                    setProcessInfo('Error storing workflow: ' + result.Err);
+                    showToast('Error storing workflow: ' + result.Err, 'error');
                 } else {
-                    setProcessInfo('Unexpected response from backend');
+                    showToast('Unexpected response from backend', 'warn');
                 }
             }
         )            
             // Add your workflow processing logic here
         } catch (error) {
-            setProcessInfo('Error: Invalid JSON format');
+            showToast('Error: Invalid JSON format', 'error');
         }
     };
 
@@ -87,14 +97,14 @@ const handleContracrSubmit = (e) => {
     // Call backend function to store the contract
     storeUploaderPowContract(contract).then((result) => {
         if ('Ok' in result) {
-            setProcessInfo('Contract stored successfully');
+            showToast('Contract stored successfully', 'info');
         } else if ('Err' in result) {
-            setProcessInfo('Error storing contract: ' + result.Err);
+            showToast('Error storing contract: ' + result.Err, 'error');
         } else {
-            setProcessInfo('Unexpected response from backend');
+            showToast('Unexpected response from backend', 'warn');
         }
     }).catch((error) => {
-        setProcessInfo('Error: ' + error.message);
+        showToast('Error: ' + error.message, 'error');
     });
 };
 

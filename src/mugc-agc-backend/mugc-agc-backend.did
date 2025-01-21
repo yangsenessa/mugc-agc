@@ -107,5 +107,5 @@ service : {
     "store_workflow_data": (text, text) -> (variant { Ok: text; Err: text });
     "fetch_workflow_data": (text) -> (text) query;
     "store_uploader_pow_contract": (UploaderPowContractInput) -> (variant { Ok; Err: text });
-    "query_workflow_ledger_by_principal_id": (text) -> (variant { Ok: vec WorkLoadLedgerItem; Err: text }) query;
+    "query_workflow_ledger_by_principal_id": (text) -> (variant { Ok: vec WorkflowLedgerItem; Err: text }) query;
 }
