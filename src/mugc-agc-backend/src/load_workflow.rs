@@ -54,6 +54,9 @@ thread_local! {
 
 pub fn store_workflow_data(principal_id: String, prompt_json: String) -> Result<String, String> {
     let store = ClientPromptStore(principal_id.clone(), prompt_json.clone());
+    ic_cdk::println!(
+        "Storing workflow data for principal_id: {}",
+        principal_id );
 
     WORKFLOW_DATA.with(|data| -> Result<(), String> {
         data.borrow_mut()
@@ -81,6 +84,7 @@ fn record_rewards_and_set_status(
     let status = WorkflowLedgerStatus::WAIT_IDENTITY;
 
     let workflow_id = format!("{}-{}", principal_id, timestamp); // Example workflow ID generation
+    ic_cdk::println!("Generated workflow_id: {}-{}-{}", principal_id, timestamp,workflow_id);
 
     let ledger_item = WorkflowLedgerItem {
         principal_id: principal_id.clone(),
@@ -101,10 +105,11 @@ fn record_rewards_and_set_status(
     })?;
 
     ic_cdk::println!(
-        "Rewards recorded and status set to '{:?}' for principal_id: {}, client_id: {}",
+        "Rewards recorded and status set to '{:?}' for principal_id: {}, client_id: {}, workflow_id: {}",
         status,
         principal_id,
-        client_id
+        client_id,
+        workflow_id
     );
 
     Ok(workflow_id.clone())
