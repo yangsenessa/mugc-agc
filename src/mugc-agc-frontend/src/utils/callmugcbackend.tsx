@@ -14,7 +14,8 @@
 
 
 import { mugc_agc_backend } from "declarations/mugc-agc-backend";
-import { UploaderPowContractInput, WorkLoadLedgerItem, WorkflowLedgerItem } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+import { UploaderPowContractInput } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+import type {WorkLoadLedgerItem, WorkflowLedgerItem} from "declarations/mugc-agc-backend/mugc-agc-backend.did";
 import { isLocalNet } from '@/utils/env';
 
 // Mode
@@ -64,9 +65,19 @@ export async function storeUploaderPowContract(input: UploaderPowContractInput):
  */
 export async function query_workflow_ledger_by_principal_id(principalId: string): Promise<{ Ok: Array<WorkflowLedgerItem> } | { Err: string }> {
     try {
+        console.log("Querying workflow ledger for principal ID:", principalId);
         const result = await mugc_agc_backend.query_workflow_ledger_by_principal_id(principalId);
+        
+        if (!result) {
+            return { Err: "No ledger data found" };
+        }
+
+        // Let the caller handle the result structure directly since developer.tsx expects 
+        // to check for 'Ok' or 'Err' properties when using setLedgerItems
         return result;
+
     } catch (error) {
-        return { Err: `Failed to query workflow ledger: ${error.message}` };
+        console.error("Query workflow ledger error:", error);
+        return { Err: error.message || "Failed to query workflow ledger" };
     }
 }

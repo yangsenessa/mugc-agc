@@ -205,11 +205,13 @@ pub fn store_or_update_uploader_pow_contract(contract_input: UploaderPowContract
         match existing_index {
             Some(index) => {
                 // Update existing contract
+                ic_cdk::println!("Updating existing contract at index: {}", index);
                 data.set(index, &contract);
                 Ok(())
             },
             None => {
                 // Store new contract
+                ic_cdk::println!("Storing new contract");
                 data.push(&contract)
                     .map_err(|e| format!("Failed to store contract: {}", e))
             }
@@ -261,6 +263,7 @@ pub fn store_workload_init_param(param: WorkLoadInitParam) -> Result<(), String>
 /// }
 /// ```
 pub fn query_workflow_ledger_by_principal(principal_id: String) -> Result<Vec<WorkflowLedgerItem>, String> {
+    ic_cdk::println!("Querying workflow ledger for principal_id: {}", principal_id);
     WORKFLOW_LEDGER.with(|ledger| {
         let ledger = ledger.borrow();
         let items: Vec<WorkflowLedgerItem> = (0..ledger.len())
@@ -269,8 +272,10 @@ pub fn query_workflow_ledger_by_principal(principal_id: String) -> Result<Vec<Wo
             .collect();
         
         if items.is_empty() {
+            ic_cdk::println!("No workflow ledger items found for principal_id: {}", principal_id);
             Err("No workflow ledger items found for the given principal_id".to_string())
         } else {
+            ic_cdk::println!("Found {} workflow ledger items for principal_id: {}", items.len(), principal_id);
             Ok(items)
         }
     })

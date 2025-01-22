@@ -57,14 +57,23 @@ type WorkLoadLedgerItem =
     mining_status : MinerTxState
   };
 
+  type WorkflowLedgerStatus = variant {
+      WAIT_IDENTITY;
+      IDENTITY_SUCCESS;
+      IDENTITY_FAIL;
+      WAIT_CLAIM;
+    };
+
   type WorkflowLedgerItem = record {
-    principal_id: principal;
-    client_id: text;
-    workflow_id: text;
-    timestamp: Timestamp;
-    token_reward: NumTokens;
-    status: text;
-  };
+      principal_id: text;
+      client_id: text;
+      workflow_id: text;
+      timestamp: Timestamp;
+      identity_timestamp: Timestamp;
+      token_reward: NumTokens;
+      status: WorkflowLedgerStatus;
+   };
+ 
 type Subscriber = record {
     topic:text;
   };

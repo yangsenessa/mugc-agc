@@ -3,7 +3,10 @@ import './developer.module.scss';
 import style from './developer.module.scss'
 import {storeWorkflowData, storeUploaderPowContract, query_workflow_ledger_by_principal_id} from "@/utils/callmugcbackend"
 import Paging from '@/components/paging';
-import { UploaderPowContractInput, WorkLoadLedgerItem, WorkflowLedgerItem } from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+import { fmtTimestamp, fmtUvBalance } from '@/utils/index';
+import { UploaderPowContractInput} from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+import type {WorkLoadLedgerItem, WorkflowLedgerItem} from "declarations/mugc-agc-backend/mugc-agc-backend.did";
+
 import { useAcountStore } from '@/stores/user';
 import {reConnectPlug} from '@/utils/icplug';
 import { showToast } from '@/components/toast';
@@ -46,20 +49,23 @@ const Developer = () => {
                     console.log('reConnectPlug exception!', e);
                 });
         }
+        queryLedger();
+        
+
     }, []);
-    React.useEffect(() => {
-        if (getPrincipal()) {
-            query_workflow_ledger_by_principal_id(getPrincipal()).then((result) => {
-                if ('Ok' in result) {
-                    setLedgerItems(result.Ok);
-                } else if ('Err' in result) {
-                    setProcessInfo('Error querying ledger: ' + result.Err);
-                }
-            }).catch((error) => {
-                setProcessInfo('Error: ' + error.message);
-            });
-        }
-    }, [getPrincipal()]);
+
+    const queryLedger = () => {
+        query_workflow_ledger_by_principal_id(getPrincipal()).then((result) => {
+            if ('Ok' in result) {
+                console.log('Successfully retrieved workflow ledger:', result.Ok);
+                setLedgerItems(result.Ok);
+            } else if ('Err' in result) {
+                console.log('Error querying ledger: ' + result.Err);
+            }
+        }).catch((error) => {
+            console.log('Error: ' + error.message);
+        });
+    };
 
     const handleWorkFlowSubmit = (e) => {
         e.preventDefault();
@@ -70,18 +76,20 @@ const Developer = () => {
                 if ('Ok' in result) {
                     showToast('Workflow stored successfully,workflowid : ' + result.Ok, 'info');
                     setWorkflowId(result.Ok);
+                    queryLedger();
                 } else if ('Err' in result) {
-                    showToast('Error storing workflow: ' + result.Err, 'error');
+                    console.log('Error storing workflow: ' + result.Err, 'error');
                 } else {
-                    showToast('Unexpected response from backend', 'warn');
+                    console.log('Unexpected response from backend', 'warn');
                 }
             }
         )            
             // Add your workflow processing logic here
         } catch (error) {
-            showToast('Error: Invalid JSON format', 'error');
+            console.log('Error: Invalid JSON format', 'error');
         }
     };
+
 
 const handleContracrSubmit = (e) => {
     e.preventDefault();
@@ -99,12 +107,12 @@ const handleContracrSubmit = (e) => {
         if ('Ok' in result) {
             showToast('Contract stored successfully', 'info');
         } else if ('Err' in result) {
-            showToast('Error storing contract: ' + result.Err, 'error');
+            console.log('Error storing contract: ' + result.Err, 'error');
         } else {
-            showToast('Unexpected response from backend', 'warn');
+            console.log('Unexpected response from backend', 'warn');
         }
     }).catch((error) => {
-        showToast('Error: ' + error.message, 'error');
+        console.log('Error: ' + error.message, 'error');
     });
 };
 
@@ -145,7 +153,7 @@ return (
             <div className={style.title}>Sample Output:</div>
             <div className={style.ipt_area}>
                 <textarea
-                    className={style.textareainput}
+                    className={style.textareainputslim}
                     value={sampleOutput}
                     onChange={(e) => setSampleOutput(e.target.value)}
                     placeholder="Enter sample output"
@@ -164,7 +172,7 @@ return (
   <div className={style.myassets}>
     <div className={style.block_title}>My Assets</div>
     {
-    assetsData.length === 0 ? 
+    ledgerItems.length === 0 ? 
     <div className="nodata">
       <div className="nodata-img"></div>
       <div className="nodata-txt">No data</div>
@@ -173,21 +181,24 @@ return (
     <div className="tbl-paged">
       <div className="tbl">
         <div className={`tbl-r tbl-r-title ${style.assets_row}`}>
-          <div className="tbl-cell-title">column1</div>
-          <div className="tbl-cell-title">column2</div>
-          <div className="tbl-cell-title">column3</div>
-          <div className="tbl-cell-title">column4</div>
+          <div className="tbl-cell-title">ClientId</div>
+          <div className="tbl-cell-title">WorkFlowID</div>
+          <div className="tbl-cell-title">UploadTime</div>
+          <div className="tbl-cell-title">TokensRewords</div>
+          <div className="tbl-cell-title">Identify Status</div>
+
         </div>
-      {assetsData.map((el) => (
-        <div key={el.id} className={`tbl-r ${style.assets_row}`}>
-          <div className="tbl-cell">{el.c1}</div>
-          <div className="tbl-cell">{el.c2}</div>
-          <div className="tbl-cell">{el.c3}</div>
-          <div className="tbl-cell">{el.c4}</div>
+      {ledgerItems.map((el) => (
+        <div key={el.workflow_id} className={`tbl-r ${style.assets_row}`}>
+          <div className="tbl-cell">{el.client_id}</div>
+          <div className="tbl-cell">{el.workflow_id}</div>
+          <div className="tbl-cell">{fmtTimestamp(Number(el.timestamp))}</div>
+          <div className="tbl-cell">{fmtUvBalance(String(el.token_reward))}</div>
+          <div className="tbl-cell">{Object.keys(el.status)[0]}</div>
         </div>
       ))}
       </div>
-      <Paging pageNum={assetsPage.pageNum} totalPage={assetsPage.totalPage} queryHandler={queryAssets} />
+      {/* <Paging pageNum={assetsPage.pageNum} totalPage={assetsPage.totalPage} queryHandler={queryAssets} /> */}
     </div>
     }
   </div>
