@@ -92,14 +92,20 @@ type WorkLoadReceipt =
       Ok:WorkLoadLedgerItem;
     };
 
-    type UploaderPowContractInput = record {
-      sample_output: text;
-      identity_gusserr_limit: float64;
-      workflow_id: text;
-    };
+type UploaderPowContractInput = record {
+    sample_output: text;
+    identity_gusserr_limit: float64;
+    workflow_id: text;
+  };
 
 type Account = record { owner : principal; subaccount : opt blob };
 type TransferArgs = record { to_account : Account; amount : nat };
+
+type UploaderPowContract = record {
+  sample_output: vec nat32;
+  identity_gusserr_limit: float64;
+  workflow_id: text;
+};
 
 
 
@@ -117,4 +123,5 @@ service : {
     "fetch_workflow_data": (text) -> (text) query;
     "store_uploader_pow_contract": (UploaderPowContractInput) -> (variant { Ok; Err: text });
     "query_workflow_ledger_by_principal_id": (text) -> (variant { Ok: vec WorkflowLedgerItem; Err: text }) query;
+    "export_all_uploader_pow_contracts": () -> (vec UploaderPowContract) query;
 }

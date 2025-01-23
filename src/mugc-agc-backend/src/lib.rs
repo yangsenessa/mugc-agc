@@ -11,7 +11,7 @@ use std::time::Duration;
 use icrc_ledger_types::icrc1::transfer::{BlockIndex};
 use mixcomfy_types::{ComfyUINode, MixComfyErr, MixComfy,
                      WorkLoadInitParam, AGIWkFlowNode, WorkLoadLedger, ComfyUIPayload,
-                     WorkLoadLedgerItem, UploaderPowContractInput, WorkflowLedgerItem};
+                     WorkLoadLedgerItem, UploaderPowContractInput, UploaderPowContract, WorkflowLedgerItem};
 use candid::{candid_method, export_service, Nat, Principal, CandidType, Deserialize, Encode};
 use ic_cdk::{
     api::{self, call},
@@ -168,6 +168,10 @@ fn push_workload_record(record: ComfyUIPayload) -> Result<WorkLoadLedgerItem, Mi
     }
 }
 
+#[ic_cdk::query]
+fn export_all_uploader_pow_contracts() -> Vec<UploaderPowContract> {
+    load_workflow::export_all_uploader_pow_contracts()
+}
 
 #[ic_cdk::query]
 fn query_curr_workload() -> Option<Vec<WorkLoadLedgerItem>> {

@@ -141,6 +141,16 @@ pub fn fetch_workflow_data(workflow_id: String) -> String {
     }
 }
 
+
+pub fn export_all_uploader_pow_contracts() -> Vec<UploaderPowContract> {
+    UPLOADER_POW_CONTRACT.with(|contracts| {
+        let contracts = contracts.borrow();
+        (0..contracts.len())
+            .filter_map(|i| contracts.get(i))
+            .collect()
+    })
+}
+
 pub fn store_uploader_pow(payload: ComfyUIPayload, contract_token:NumTokens) -> Result<NumTokens, String> {
     
     let existing_contract = UPLOADER_POW_CONTRACT.with(|data| {
@@ -152,9 +162,9 @@ pub fn store_uploader_pow(payload: ComfyUIPayload, contract_token:NumTokens) -> 
 
     if let Some(contract) = existing_contract {
         ic_cdk::println!("Found existing contract: {:?}", contract);
-        let test_output = UploaderPowContract::parse_base64_string_to_vec(&payload.voice_key);
+        let test_output = UploaderPowContract::parse_string_to_vec(&payload.voice_key);
         let error = contract.calculate_gauss_error(test_output);
-        let tokens: NumTokens = if error < 0.3 {
+        let tokens: NumTokens = if error > 0.7 {
             contract_token.clone()
         } else {
             NumTokens::from(0 as u64)
@@ -184,7 +194,7 @@ pub fn store_uploader_pow(payload: ComfyUIPayload, contract_token:NumTokens) -> 
 
 pub fn store_or_update_uploader_pow_contract(contract_input: UploaderPowContractInput) -> Result<(), String> {
     let contract = UploaderPowContract {
-        sample_output: UploaderPowContract::parse_base64_string_to_vec(&contract_input.sample_output),
+        sample_output: UploaderPowContract::parse_string_to_vec(&contract_input.sample_output),
         identity_gusserr_limit: contract_input.identity_gusserr_limit,
         workflow_id: contract_input.workflow_id.clone(),
     };

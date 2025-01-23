@@ -333,17 +333,26 @@ impl UploaderPowContract {
     }
 
     pub fn calculate_gauss_error(&self, test_output: Vec<u32>) -> f64 {
+        let mut test_output_padded = test_output.clone();
+        let mut sample_output_padded = self.sample_output.clone();
+        ic_cdk::println!("test_output_padded: {:?}\n", test_output_padded);
+        ic_cdk::println!("sample_output_padded: {:?}\n", sample_output_padded);
         if self.sample_output.len() != test_output.len() {
-            return f64::MAX;
+            if test_output_padded.len() < sample_output_padded.len() {
+                test_output_padded.resize(sample_output_padded.len(), 0);
+            } else if sample_output_padded.len() < test_output_padded.len() {
+                sample_output_padded.resize(test_output_padded.len(), 0);
+            }
+            
         }
 
         let mut sum_squared_diff = 0.0;
-        for (expected, actual) in self.sample_output.iter().zip(test_output.iter()) {
+        for (expected, actual) in sample_output_padded.iter().zip(test_output_padded.iter()) {
             let diff = *expected as f64 - *actual as f64;
             sum_squared_diff += diff * diff;
         }
 
-        let n = self.sample_output.len() as f64;
+        let n = sample_output_padded.len() as f64;
         let mse = sum_squared_diff / n;
         let erf = 1.0 - (-mse / 2.0).exp();
         erf
