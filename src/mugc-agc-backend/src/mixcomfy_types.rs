@@ -166,7 +166,7 @@ pub struct WorkflowLedgerItem {
     pub token_reward: NumTokens,
     pub status: WorkflowLedgerStatus,
 }
-#[derive(Clone, Debug, CandidType, Deserialize, Serialize, Default)]
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize, Default, PartialEq)]
 pub enum WorkflowLedgerStatus {
     #[default]
     WAIT_IDENTITY,

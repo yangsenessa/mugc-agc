@@ -124,4 +124,6 @@ service : {
     "store_uploader_pow_contract": (UploaderPowContractInput) -> (variant { Ok; Err: text });
     "query_workflow_ledger_by_principal_id": (text) -> (variant { Ok: vec WorkflowLedgerItem; Err: text }) query;
     "export_all_uploader_pow_contracts": () -> (vec UploaderPowContract) query;
+    "query_wait_identity_workflows": () -> (vec text) query;
+    "query_wait_training_workflows": () -> (vec text) query;
 }

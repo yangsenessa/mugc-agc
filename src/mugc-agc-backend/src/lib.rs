@@ -229,6 +229,16 @@ fn query_workflow_ledger_by_principal_id(principal_id: String) -> Result<Vec<Wor
     load_workflow::query_workflow_ledger_by_principal(principal_id)
 }
 
+#[ic_cdk::query]
+fn query_wait_identity_workflows() -> Vec<String> {
+    load_workflow::query_wait_identity_workflows()
+}
+
+#[ic_cdk::query]
+fn query_wait_training_workflows() -> Vec<String> {
+    load_workflow::query_wait_training_workflows()
+}
+
 
 #[ic_cdk::init]
 fn init() {

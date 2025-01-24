@@ -175,7 +175,7 @@ pub fn store_uploader_pow(payload: ComfyUIPayload, contract_token:NumTokens) -> 
             let mut ledger = ledger.borrow_mut();
             for i in 0..ledger.len() {
                 if let Some(mut item) = ledger.get(i) {
-                    if item.client_id == payload.client_id {
+                    if item.workflow_id == payload.wk_id {
                         item.token_reward = tokens.clone();
                         item.status = WorkflowLedgerStatus::WAIT_CLAIM;
                         ledger.set(i, &item);
@@ -290,3 +290,40 @@ pub fn query_workflow_ledger_by_principal(principal_id: String) -> Result<Vec<Wo
         }
     })
 }
+
+/// Queries the workflow ledger to retrieve all workflow IDs that are in the `WAIT_IDENTITY` status.
+///
+/// # Returns
+/// * `Vec<String>` - A vector of workflow IDs that are currently waiting for identity verification.
+///
+/// # Examples
+pub fn query_wait_identity_workflows() -> Vec<String> {
+    WORKFLOW_LEDGER.with(|ledger| {
+        let ledger = ledger.borrow();
+        (0..ledger.len())
+            .filter_map(|i| ledger.get(i))
+            .filter(|item| item.status == WorkflowLedgerStatus::WAIT_IDENTITY)
+            .map(|item| item.workflow_id)
+            .collect()
+    })
+}
+
+/// Queries the workflow ledger to retrieve all workflow IDs that are not in the `WAIT_IDENTITY` or `IDENTITY_FAIL` status.
+///
+/// # Returns
+/// * `Vec<String>` - A vector of workflow IDs that are currently not waiting for identity verification or have failed identity verification.
+///
+/// # Examples
+pub fn query_wait_training_workflows() -> Vec<String> {
+    WORKFLOW_LEDGER.with(|ledger| {
+        let ledger = ledger.borrow();
+        (0..ledger.len())
+            .filter_map(|i| ledger.get(i))
+            .filter(|item| item.status != WorkflowLedgerStatus::WAIT_IDENTITY && item.status != WorkflowLedgerStatus::IDENTITY_FAIL)
+            .map(|item| item.workflow_id)
+            .collect()
+    })
+}
+
+
+
