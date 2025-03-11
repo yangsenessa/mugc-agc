@@ -126,4 +126,6 @@ service : {
     "export_all_uploader_pow_contracts": () -> (vec UploaderPowContract) query;
     "query_wait_identity_workflows": () -> (vec text) query;
     "query_wait_training_workflows": () -> (vec text) query;
+    "get_voice_data": () -> (variant { Ok: record { principal_id: principal; folder_id: nat32; file_id: nat32; status: int8; created_at: nat64; updated_at: nat64; custom: opt vec record { text; variant { Int: int64; Nat: nat64; Blob: blob; Text: text } }; content: opt text }; Err: text });
+    "set_oss_bucket_canister": (principal) -> ();
 }

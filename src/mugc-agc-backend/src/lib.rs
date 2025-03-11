@@ -1,6 +1,8 @@
 mod mixcomfy_types;
 mod mixcomfy_service;
 mod load_workflow;
+mod voice_oss_type;
+mod voice_oss_service;
 
 use std::{cell::RefCell, result};
 use std::mem;
@@ -238,6 +240,20 @@ fn query_wait_identity_workflows() -> Vec<String> {
 fn query_wait_training_workflows() -> Vec<String> {
     load_workflow::query_wait_training_workflows()
 }
+
+#[ic_cdk::update]
+async fn get_voice_data() -> Result<voice_oss_type::VoiceOssInfo, String> {
+    let voice_data = voice_oss_service::get_current_voice_data(None).await?;
+    voice_data.first()
+        .cloned()
+        .ok_or_else(|| "No voice data exists".to_string())
+}
+
+#[ic_cdk::update]
+fn set_oss_bucket_canister(canister_id: Principal) {
+    voice_oss_service::set_oss_bucket_canister_id(canister_id);
+}
+
 
 
 #[ic_cdk::init]
